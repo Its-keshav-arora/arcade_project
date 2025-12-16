@@ -18,9 +18,9 @@ def main():
     # 3. Call the MCP Tool
     # Ensure 'tool_name' matches exactly what you defined in your MCP server code
     try:
-        result = client.tools.call(
+        result = client.tools.execute(
             tool_name="announce_pr", 
-            inputs={
+            input={
                 "pr_title": pr_title,
                 "pr_url": pr_url,
                 "author": author,
