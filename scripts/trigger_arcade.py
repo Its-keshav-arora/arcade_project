@@ -45,8 +45,9 @@ def main():
         print(f"PR_AUTHOR: {author}")
         exit(1)
     
+
     # YOUR EMAIL HERE: This determines which Slack account sends the message
-    user_email = "github_bot" 
+    user_email = "keshav11y@gmail.com" 
 
     print(f"Processing PR: {pr_title} by {author}")
     print(f"PR URL: {pr_url}")
@@ -138,7 +139,7 @@ def main():
                 "channel_name": "repository-updates",  # Your Slack channel name
                 "message": message_text  # Use 'message' not 'text'
             },
-            user_id=user_email
+            user_id="github_bot"
         )
         print("Success! Message sent to Slack:")
         print(result)
