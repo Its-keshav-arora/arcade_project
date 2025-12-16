@@ -17,13 +17,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Arcade Library
-        run: pip install arcadepy
+      - name: Install dependencies
+        run: |
+          pip install arcadepy
+          pip install --upgrade pip
 
       - name: Run Trigger Script
         env:
           # This pulls the key we saved in Step 1
           ARCADE_API_KEY: ${{ secrets.ARCADE_API_KEY }}
+          # Your Github Bot's OAuth token (add this to GitHub Secrets)
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           # These are automatically provided by GitHub
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
