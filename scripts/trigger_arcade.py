@@ -55,6 +55,7 @@ def main():
                 "slack_bot_token": slack_bot_token  # Pass the bot token to use your "Github Bot"
             },
             user_id="github_bot"
+            
         )
         print("Success! Response from Arcade:")
         print(result)
