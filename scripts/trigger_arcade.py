@@ -139,7 +139,8 @@ def main():
                 "channel_name": "repository-updates",  # Your Slack channel name
                 "message": message_text  # Use 'message' not 'text'
             },
-            user_id="github_bot"
+            user_id=user_email
+            
         )
         print("Success! Message sent to Slack:")
         print(result)
