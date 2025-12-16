@@ -53,7 +53,6 @@ def main():
                 "channel_id": "C0A3XH9RZJ6", # Replace with your Slack Channel ID if needed
                 "slack_bot_token": slack_bot_token  # Pass the bot token to use your "Github Bot"
             },
-            user_id=user_email
         )
         print("Success! Response from Arcade:")
         print(result)
