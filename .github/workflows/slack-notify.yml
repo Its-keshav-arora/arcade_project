@@ -19,18 +19,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install arcadepy
           pip install --upgrade pip
+          pip install arcadepy
 
       - name: Run Trigger Script
         env:
           # This pulls the key we saved in Step 1
           ARCADE_API_KEY: ${{ secrets.ARCADE_API_KEY }}
-          # Your Github Bot's OAuth token (add this to GitHub Secrets)
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           # These are automatically provided by GitHub
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-        # This runs the python script we create in File B
+        # This runs the python script that uses Arcade's built-in tools
         run: python scripts/trigger_arcade.py
