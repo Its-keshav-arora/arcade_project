@@ -55,12 +55,22 @@ def main():
     owner, repo = extract_repo_info(pr_url)
     pr_number = extract_pr_number(pr_url)
     
-    # 4. Optionally get more PR details using Arcade's GitHub tool
+    # 4. Authorize GitHub tool if needed, then get PR details
     pr_details = None
     if owner and repo and pr_number:
         try:
+            # Check/authorize GitHub tool
+            print("Checking GitHub authorization...")
+            github_auth = client.tools.authorize(
+                tool_name="GitHub.GetPullRequest",
+                user_id=user_email
+            )
+            if github_auth.status != "completed":
+                print(f"Warning: GitHub authorization required. Visit: {github_auth.url}")
+                print("Note: Authorization must be completed in Arcade dashboard before automation can work.")
+            
             print(f"Fetching PR details from GitHub using Arcade...")
-            pr_details = client.tools.execute(
+            pr_response = client.tools.execute(
                 tool_name="GitHub.GetPullRequest",
                 input={
                     "owner": owner,
@@ -69,34 +79,64 @@ def main():
                 },
                 user_id=user_email
             )
-            print(f"PR details retrieved: {pr_details}")
+            # Extract the value from the response
+            if hasattr(pr_response, 'output') and hasattr(pr_response.output, 'value'):
+                pr_details = pr_response.output.value
+            elif isinstance(pr_response, dict) and 'output' in pr_response:
+                pr_details = pr_response['output'].get('value')
+            else:
+                pr_details = pr_response
+            print(f"PR details retrieved successfully")
         except Exception as e:
             print(f"Warning: Could not fetch PR details from GitHub: {e}")
             print("Using basic PR information from GitHub Actions...")
     
-    # 5. Format the Slack message
+    # 5. Format the Slack message with repository update details
     if pr_details and isinstance(pr_details, dict):
         # Use detailed info from GitHub tool if available
-        message_text = f"🚨 *New PR Raised* 🚨\n\n"
+        message_text = f"🚨 *Repository Update: New Pull Request* 🚨\n\n"
         message_text += f"*Title:* {pr_details.get('title', pr_title)}\n"
-        message_text += f"*Author:* {pr_details.get('user', {}).get('login', author)}\n"
+        message_text += f"*Author:* {pr_details.get('user', author)}\n"
+        message_text += f"*Repository:* {owner}/{repo}\n"
+        message_text += f"*PR #:* {pr_number}\n"
+        message_text += f"*State:* {pr_details.get('state', 'open')}\n"
+        message_text += f"*Base Branch:* {pr_details.get('base', 'main')} ← *Head Branch:* {pr_details.get('head', 'unknown')}\n"
         message_text += f"*Link:* {pr_url}\n"
         if pr_details.get('body'):
-            body_preview = pr_details['body'][:200] + "..." if len(pr_details.get('body', '')) > 200 else pr_details.get('body', '')
-            message_text += f"\n*Description:* {body_preview}\n"
+            body_preview = pr_details['body'][:200] + "..." if len(str(pr_details.get('body', ''))) > 200 else str(pr_details.get('body', ''))
+            message_text += f"\n*Description:*\n{body_preview}\n"
         message_text += f"\nPlease review! :eyes:"
     else:
         # Use basic info from GitHub Actions
-        message_text = f"🚨 *New PR Raised by {author}* 🚨\n\n*Title:* {pr_title}\n*Link:* {pr_url}\n\nPlease review! :eyes:"
+        message_text = f"🚨 *Repository Update: New Pull Request* 🚨\n\n"
+        message_text += f"*Title:* {pr_title}\n"
+        message_text += f"*Author:* {author}\n"
+        message_text += f"*Link:* {pr_url}\n"
+        message_text += f"\nPlease review! :eyes:"
 
-    # 6. Send message to Slack using Arcade's Slack.SendMessage tool
+    # 6. Authorize Slack tool if needed
+    try:
+        print("Checking Slack authorization...")
+        auth_response = client.tools.authorize(
+            tool_name="Slack.SendMessage",
+            user_id=user_email
+        )
+        if auth_response.status != "completed":
+            print(f"Warning: Slack authorization required. Visit: {auth_response.url}")
+            print("Note: Authorization must be completed in Arcade dashboard before automation can work.")
+            # For automation, we'll try to proceed - authorization should be done beforehand
+    except Exception as e:
+        print(f"Warning: Could not check authorization: {e}")
+        print("Proceeding with execution (assuming authorization is already complete)...")
+
+    # 7. Send message to Slack using Arcade's Slack.SendMessage tool
     try:
         print("Sending message to Slack...")
         result = client.tools.execute(
             tool_name="Slack.SendMessage",
             input={
-                "conversation_id": "C0A3XH9RZJ6",  # Your Slack channel ID
-                "text": message_text
+                "channel_name": "repository-updates",  # Your Slack channel name
+                "message": message_text  # Use 'message' not 'text'
             },
             user_id=user_email
         )
