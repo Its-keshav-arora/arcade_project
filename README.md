@@ -1,4 +1,5 @@
 # GitHub PR to Slack Notification using Arcade MCP
+<!-- test commit -->
 
 This project automatically sends Slack notifications to your team whenever a Pull Request (PR) is opened in your GitHub repository. It uses [Arcade.dev](https://arcade.dev) MCP (Model Context Protocol) server to seamlessly integrate GitHub and Slack.
 
