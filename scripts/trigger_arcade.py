@@ -11,7 +11,7 @@ except ImportError:
 
 def extract_repo_info(pr_url):
     """Extract owner and repo from PR URL"""
-    # Example: https://github.com/Its-keshav-arora/arcade_project/pull/3
+    # Example: https://github.com/<owner-name>/arcade_project/pull/3
     match = re.search(r'github\.com/([^/]+)/([^/]+)', pr_url)
     if match:
         return match.group(1), match.group(2)
